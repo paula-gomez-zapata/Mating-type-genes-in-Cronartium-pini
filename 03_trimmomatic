@@ -1,17 +1,22 @@
 ################################################################################
 # 03 Trimmomatic
-# remove adapter sequences and index sequences. 
+# Remove adapter sequences and index sequences. 
 ################################################################################
 
-data="/nfs4/my-mgrid-s8/mykopat-proj1/mykopat-c-flacc/raw-data/resequencing/220923_A00605_0495_BHJ5JKDRX2"   # directory where raw data files are found
-r1tag="_R1_001"                            # string that identifies read 1 files
-r2tag="_R2_001"                            # string that identifies the read 2 files
-fastqsuffix=".fastq.gz"                    # terminal part of fastq filenames
-target="$data/Sample_VH-3377-*/*$r1tag$fastqsuffix"    # search term for fastq files
-
-trimmed="/nfs4/my-mgrid-s8/mykopat-proj1/mykopat-c-flacc/analysis/02trimmed_adapters2-14-7-2"  # directory for the trimmed files
-#
-adapter=/nfs4/my-mgrid-s8/mykopat-proj1/mykopat-c-flacc/analysis/02trimmed_adapters/combined_adapters_and_indexes.fa    # adapter file
+# directory where raw data files are found
+data="/nfs4/my-mgrid-s8/mykopat-proj1/mykopat-c-flacc/raw-data/resequencing/220923_A00605_0495_BHJ5JKDRX2"
+# string that identifies read 1 files
+r1tag="_R1_001"
+# string that identifies read 2 files
+r2tag="_R2_001"
+# terminal part of fastq filenames
+fastqsuffix=".fastq.gz"
+# search term for fastq files
+target="$data/Sample_VH-3377-*/*$r1tag$fastqsuffix"    
+# directory for the trimmed files
+trimmed="/nfs4/my-mgrid-s8/mykopat-proj1/mykopat-c-flacc/analysis/02trimmed_adapters2-14-7-2"  
+# adapter file
+adapter=/nfs4/my-mgrid-s8/mykopat-proj1/mykopat-c-flacc/analysis/02trimmed_adapters/combined_adapters_and_indexes.fa    
 #
 runfqc_after=true   # change to true  to skip after trimming QC
 #
