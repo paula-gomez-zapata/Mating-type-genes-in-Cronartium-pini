@@ -1,38 +1,10 @@
 ################################################################################
-# 1. Sort a FASTA file by the size of the scaffolds:
+# 1. Sort a FASTA file by scaffold size:
 #
-# Extract scaffold sizes from the FASTA file.
+# Extract scaffolds size from the FASTA file.
 # Sort scaffolds based on size.
-# Reorder the FASTA file based on the sorted scaffold sizes.
+# Reorder the FASTA file based on the sorted scaffolds size.
 ################################################################################
-#
-# Request 2 hours, 0 minutes, 0 seconds run time
-#$ -l h_rt=12:0:0
-#
-# Request 4GB memory (check the need for your specific program!)
-#$ -l h_vmem=16G
-#
-# Request mails to be sent when the job finishes (e) or if it fails (a)
-#$ -m ae 
-#
-# Run in the current directory (otherwise it will run from your home directory)
-#$ -cwd 
-#
-# Keep all output in a single file
-#$ -j y 
-#
-# Temporary files created during the job should be placed in $TMPDIR
-# This directory is local to the server where the job is executed and
-# file access here is MUCH faster than the project folder. 
-#
-# Place your commands below this line
-#
-# If you need to run your job with multiple threads you can do so by using the following commands:
-# SMP (symmetric multiprocessing) is the processing of programs by multiple processors that share a common operating system and memory.
-# -pe smp (# of cores you want - not in brackets) 
-#$ -pe smp 20
-#
-#################################################################################################################
 
 genome_file="/nfs4/my-mgrid-s8/mykopat-proj1/mykopat-c-flacc/raw-data/assembly/pt_128_002_nuclear_20220614.fasta.gz"
 output="/nfs4/my-mgrid-s8/mykopat-proj1/mykopat-c-flacc/sort_nuc_genome"
