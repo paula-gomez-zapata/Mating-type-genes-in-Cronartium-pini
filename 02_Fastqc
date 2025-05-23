@@ -1,5 +1,7 @@
+################################################################################
 # 02 FASTQC
 # This script is designed to execute FASTQC, allowing for an assessment of the quality of reads for each Cronartium pini's sample, either raw reads or reads after trimming the adapters.
+################################################################################
 
 #load modules
 module load fastqc
