@@ -1,6 +1,6 @@
-################################################################################
-# SPADES GENOME ASSEMBLY
-#
+me################################################################################
+# 04 Spades Genome Assembly
+# Perform assemblies for each C. pini sample.
 ################################################################################
 
 #load modules
@@ -28,9 +28,7 @@ spades.py --debug \
     -o "$output_directory" \
     --isolate --tmp-dir "$TMPDIR"
 
-
-
-# Specify the paths to your input files
+# Specify the paths to the input files
 #forward_reads="/nfs4/my-mgrid-s8/mykopat-proj1/mykopat-c-flacc/analysis/02trimmed_adapters2-14-7-2/Sample_VH-3377-543/VH-3377-543_S2_L001_R1_001.paired.fastq.gz"
 #reverse_reads="/nfs4/my-mgrid-s8/mykopat-proj1/mykopat-c-flacc/analysis/02trimmed_adapters2-14-7-2/Sample_VH-3377-543/VH-3377-543_S2_L001_R2_001.paired.fastq.gz"
 
