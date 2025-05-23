@@ -1,6 +1,8 @@
-
+################################################################################
 # 10 This job will map raw reads of PacBio sequencing to the reference genome assembly.
 # With this info, we will obtain coverage of reference genome and then we will use this info to plot genome-wide coverage in R.
+# 
+################################################################################
 
 #load modules
 module load minimap2
