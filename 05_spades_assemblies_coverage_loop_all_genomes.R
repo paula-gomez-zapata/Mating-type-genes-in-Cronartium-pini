@@ -1,5 +1,6 @@
 ################################################################################
 # 05. Plot read depth for each genome assembly and save all plots in a grid arrange.
+################################################################################
 
 # Clear global environment
 rm(list = ls())
