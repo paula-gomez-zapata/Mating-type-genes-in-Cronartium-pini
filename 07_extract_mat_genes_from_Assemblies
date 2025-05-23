@@ -1,0 +1,55 @@
+################################################################################
+# 07 Extract MAT sequences from Assembly files
+# 
+################################################################################
+
+# Load modules
+module load samtools
+
+# Define the directory
+directory=/nfs4/my-mgrid-s8/mykopat-proj1/mykopat-c-flacc/analysis/Spades_Genome_Assemblies/sample_427_spades_assembly_rerun
+#directory=/nfs4/my-mgrid-s8/mykopat-proj1/mykopat-c-flacc/sort_ref_genome
+
+
+# Ensure we have a txt file with the regions we want to extract.
+# Each line should contain the scaffold name, start, end positions, and a name.
+# The file should be named regions_to_extract.txt and have this format:
+# scaffold1:1000-2000 region1
+# scaffold2:5000-6000 region2
+# scaffold3:3000-4000 region3
+
+# Read the regions_to_extract.txt file and extract the sequences, renaming them
+#while read region name; do
+#  samtools faidx $directory/scaffolds.fasta $region | sed "s/>.*/>$name/" >> $directory/extracted_sequences_named.fasta
+#done < $directory/regions_to_extract.txt
+
+# First, create an index for our fasta file
+#samtools faidx $directory/scaffolds.fasta
+#samtools faidx $directory/concatenated_all_three.fasta
+
+# Check if the regions_to_extract.txt file exists
+if [ ! -f "$directory/regions_to_extract_MAT_genes.txt" ]; then
+  echo "Error: regions_to_extract_MAT_genes.txt not found in $directory"
+  exit 1  # Exit with a non-zero status to indicate failure
+fi
+
+# Ensure the last line ends with a newline character
+sed -i -e '$a\' "$directory/regions_to_extract_MAT_genes.txt"
+
+# Read the regions_to_extract_MAT_genes.txt file and extract the sequences, renaming them
+while IFS=' ' read -r scaffold_range name; do
+  # Print the current scaffold and range for debugging
+  echo "Processing $scaffold_range as $name"
+
+  # Extract scaffold and range from scaffold_range
+  scaffold=$(echo $scaffold_range | cut -d: -f1)
+  range=$(echo $scaffold_range | cut -d: -f2)
+
+  if samtools faidx $directory/scaffolds.fasta "$scaffold:$range" | sed "s/>.*/>$name/" >> $directory/extracted_MAT_sequences.fasta; then
+  #if samtools faidx $directory/concatenated_all_three.fasta "$scaffold:$range" | sed "s/>.*/>$name/" >> $directory/extracted_MAT_sequences.fasta; then
+    echo "Successfully processed $scaffold:$range as $name"
+  else
+    echo "Failed to process $scaffold:$range"
+    exit 1 # Exit with a non-zero status to indicate failure
+  fi
+done < $directory/regions_to_extract_MAT_genes.txt
