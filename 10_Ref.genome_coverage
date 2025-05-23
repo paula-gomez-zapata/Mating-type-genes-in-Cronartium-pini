@@ -1,9 +1,27 @@
 ################################################################################
 # 10 Genome-wide Coverage analysis
-# 
+# This job will map the mating genes to the reference genome
+# Use samtools depth to extract coverage over the region where the mating gene was mapped.
+# Compute average coverage
 ################################################################################
 
+#load modules
+module load minimap2
+module load samtools
 
-minimap2
-samtools
-R
+#define paths:
+directory=/xx/coverage_ref.genome
+ref_genome="/xx/assembly/pt_128_002_nuclear_20220614.fasta.gz"
+gene="/xx/gene_thirdMFA.fasta"
+bam_file="/xx/pacbio_ref_mapped.bam"
+
+minimap2 -x asm5 -c $ref_genome $gene > $directory/thirdMFA_alignment.sam
+#now go to this file and check the coordinates.
+#STOP
+
+#extract coverage over the region where the gene was aligned to the ref. genome.
+#uncomment this line below and comment the above line to run this job again.
+#samtools depth -r ptg000028l:407555-407776 $bam_file > $directory/thirdMFA_coverage.txt
+
+#compute average coverage
+awk '{sum += $3} END {print "Average coverage thirdMFA:", sum/NR}' $directory/thirdMFA_coverage.txt
