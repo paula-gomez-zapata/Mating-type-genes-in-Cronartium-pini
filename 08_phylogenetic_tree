@@ -1,0 +1,18 @@
+
+
+# Load the necessary modules
+module load iqtree
+
+#define directory
+#directory=/nfs4/my-mgrid-s8/mykopat-proj1/mykopat-c-flacc/mycodiplosis_tree
+directory="/nfs4/my-mgrid-s8/mykopat-proj1/mykopat-c-flacc/analysis/ALL_MAT_sequences_extracted/alignment_AA_MFAs_2.2.2025.fas"
+
+cd $directory
+
+#find a model and make the tree
+#iqtree2 -s $directory/STE3.2_ALLsamples_trimming_more_tails.fas -m MFP -B 1000 -AICc -bnni -T AUTO
+
+#multilocus phylogenetic tree.  partitioning genes.
+#iqtree2 -p $directory/all_partitions_dataset.nex -B 1000 -T AUTO
+
+iqtree2 -s $directory -m LG+C10+F -mset LG -nt AUTO -bb 1000
