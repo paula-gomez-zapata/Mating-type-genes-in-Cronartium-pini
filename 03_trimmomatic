@@ -1,0 +1,152 @@
+################################################################################
+# 03Trimmomatic
+# remove adapter sequences and index sequences. 
+################################################################################
+
+data="/nfs4/my-mgrid-s8/mykopat-proj1/mykopat-c-flacc/raw-data/resequencing/220923_A00605_0495_BHJ5JKDRX2"   # directory where raw data files are found
+r1tag="_R1_001"                            # string that identifies read 1 files
+r2tag="_R2_001"                            # string that identifies the read 2 files
+fastqsuffix=".fastq.gz"                    # terminal part of fastq filenames
+target="$data/Sample_VH-3377-*/*$r1tag$fastqsuffix"    # search term for fastq files
+
+trimmed="/nfs4/my-mgrid-s8/mykopat-proj1/mykopat-c-flacc/analysis/02trimmed_adapters2-14-7-2"  # directory for the trimmed files
+#
+adapter=/nfs4/my-mgrid-s8/mykopat-proj1/mykopat-c-flacc/analysis/02trimmed_adapters/combined_adapters_and_indexes.fa    # adapter file
+#
+runfqc_after=true   # change to true  to skip after trimming QC
+#
+#-------------------------------------------------------------------------------
+# parameter report
+#-------------------------------------------------------------------------------
+echo "Trimmomatic"
+echo -e "\tdata directory: $data/"
+echo -e "\tR1/R2 tags: $r1tag/$r2tag"
+echo -e "\tfastq file suffix: $fastqsuffix"
+echo -e "\ttarget: $target"
+echo -e "\toutput directory: $trimmed/"
+
+if $runfqc_after; then
+    echo -e "\tFastQC after trimming: $fqc_after_dir"
+fi
+echo -e "\tadapter file: $adapter"
+ 
+# trimming command definition.  Each command is executed in the order given.
+# Adapter trimming should go first, if used
+
+#illuminaclip:adapter_file:seed mismatches:palindromeClip:simpleClipThreshold:minAdapterLength>:<keepBothReads>
+#seedMismatches: specifies the maximum mismatch count which will still allow a full match to be performed.
+#palindrome clip threshold: specifies how accurate the match between the two 'adapter ligated' reads must be 
+#for PE palindrome read alignment.
+#simpleClipThreshold: specifies how accurate the match between any adapter etc. sequence must be against a read.
+#minAdapterLength: In addition to the alignment score, palindrome mode can verify that a minimum length of 
+#adapter has been detected. If unspecified, this defaults to 8 bases, for historical reasons. 
+#However, since palindrome mode has a very low false positive rate, this can be safely reduced, even down to 1,
+# to allow shorter adapter fragments to be removed.
+#keepBothReads: After read-though has been detected by palindrome mode, and the adapter sequence removed, 
+#the reverse read contains the same sequence information as the forward read, albeit in reverse complement. 
+#For this reason, the default behaviour is to entirely drop the reverse read. By specifying „true‟ for this 
+#parameter, the reverse read will also be retained, which may be useful e.g. if the downstream tools cannot 
+#handle a combination of paired and unpaired reads.
+
+# leading: is going to remove bases at the beginning of the reads if it finds a quality base lower than the one I specify
+# trailing: is going to remove bases at the end if it finds a quality base lower than the one I specify. 
+#quality 10: 90% chances of being correct or 10% changes of being incorrect.
+#slidingwindow: 5:16 means go across the sequence. Scans the read with a 5 wide sliding window, cutting once
+# the average quality within the window falls below 16
+#why 16? if you have a 5 base window and one base have a quality of zero maybe because there is a bubble or 
+#something
+#but the other bases were good. the quality would be 4*20=80 and 80/5=16
+#you can modify these values as you wish.
+#minlen: is the minimum length we accept to have after cutting adapters and some part of the reads.
+#
+trimmer="ILLUMINACLIP:$adapter:2:14:7:2:true \
+LEADING:10 \
+TRAILING:10 \
+SLIDINGWINDOW:5:16 \
+MINLEN:30"
+ 
+echo -e "\trimming command: $trimmer"
+ 
+#-------------------------------------------------------------------------------
+# check for debug mode
+#-------------------------------------------------------------------------------
+debug=false
+if [[ $1 == "debug" ]]; then
+    debug=true
+fi
+if $debug; then
+    echo -e "\n#-------------------------------------------------------------------------------"
+    echo -e "# Debug mode: commands will not be executed"
+    echo -e "#-------------------------------------------------------------------------------"
+else
+    echo -e "\n#-------------------------------------------------------------------------------"
+    echo -e "# Executing script"
+    echo -e "#-------------------------------------------------------------------------------"
+fi
+
+################################################################################
+# begin script; 
+################################################################################
+
+module load fastqc
+java -Xmx1G -jar /opt/sw/trimmomatic/0.36/trimmomatic-0.36.jar
+
+#-------------------------------------------------------------------------------
+# Trimmomatic
+# input is all files that match the target:"$data/Sample_VH-3377-*/*$r1tag$fastqsuffix"
+#-------------------------------------------------------------------------------
+echo -e "\nTrimmomatic"
+echo -e "\t`date`"
+ 
+# Directory where you want to create subdirectories for each DNA sample
+output_dir="/nfs4/my-mgrid-s8/mykopat-proj1/mykopat-c-flacc/analysis/02trimmed_adapters2-14-7-2/"
+
+# Extract folder names from the raw-data directory
+raw_data_dir="/nfs4/my-mgrid-s8/mykopat-proj1/mykopat-c-flacc/raw-data/resequencing/220923_A00605_0495_BHJ5JKDRX2"
+folder_names=($(find "$raw_data_dir" -maxdepth 1 -type d -name "Sample*" -exec basename {} \;))
+
+# Create subdirectories based on the names in the raw-data directory
+for folder_name in "${folder_names[@]}"; do
+    mkdir -p "${output_dir}/${folder_name}"
+done
+
+# run trimmomatic on each set of reads
+for r1 in $target
+do
+    # for each read 1, generate the read 2 name be replacing $r1tag with $r2tag
+    # generate the paired and unpaired output file names by replacing
+    # $fastqsuffix with paired$fastqsuffix or unpaired.$fastqsuffix in both
+    # read 1 and read 2 names
+ 
+    r2="${r1/$r1tag/$r2tag}"
+    r1p="${r1/$fastqsuffix/.paired$fastqsuffix}"
+    r1u="${r1/$fastqsuffix/.unpaired$fastqsuffix}"
+    r2p="${r2/$fastqsuffix/.paired$fastqsuffix}"
+    r2u="${r2/$fastqsuffix/.unpaired$fastqsuffix}"
+ 
+    # remove data directory from output files
+    r1p=$trimmed/"${r1p/$data\//}"
+    r1u=$trimmed/"${r1u/$data\//}"
+    r2p=$trimmed/"${r2p/$data\//}"
+    r2u=$trimmed/"${r2u/$data\//}"
+
+    com1="java -Xmx1G -jar /opt/sw/trimmomatic/0.36/trimmomatic-0.36.jar PE \
+    -threads 20 \
+    $r1 $r2 \
+    $r1p $r1u \
+    $r2p $r2u \
+    $trimmer"
+    com1out=${com1//     /\\n\\t    }
+    echo -e "\n\t$com1out"
+    
+    # Execute the trimming command
+    echo -e "\nTrimming reads:"
+    echo -e "\t`date`"
+    echo -e "\t$com1"
+    if ! $debug; then
+        $com1
+    fi
+done
+      
+
+echo -e "\n`date`"
