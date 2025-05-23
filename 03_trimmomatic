@@ -17,8 +17,8 @@ target="$data/Sample_VH-3377-*/*$r1tag$fastqsuffix"
 trimmed="/nfs4/my-mgrid-s8/mykopat-proj1/mykopat-c-flacc/analysis/02trimmed_adapters2-14-7-2"  
 # adapter file
 adapter=/nfs4/my-mgrid-s8/mykopat-proj1/mykopat-c-flacc/analysis/02trimmed_adapters/combined_adapters_and_indexes.fa    
-#
-runfqc_after=true   # change to true  to skip after trimming QC
+# change to true to skip after trimming QC
+runfqc_after=true
 #
 #-------------------------------------------------------------------------------
 # parameter report
@@ -34,36 +34,30 @@ if $runfqc_after; then
     echo -e "\tFastQC after trimming: $fqc_after_dir"
 fi
 echo -e "\tadapter file: $adapter"
- 
-# trimming command definition.  Each command is executed in the order given.
-# Adapter trimming should go first, if used
 
-#illuminaclip:adapter_file:seed mismatches:palindromeClip:simpleClipThreshold:minAdapterLength>:<keepBothReads>
-#seedMismatches: specifies the maximum mismatch count which will still allow a full match to be performed.
-#palindrome clip threshold: specifies how accurate the match between the two 'adapter ligated' reads must be 
-#for PE palindrome read alignment.
-#simpleClipThreshold: specifies how accurate the match between any adapter etc. sequence must be against a read.
-#minAdapterLength: In addition to the alignment score, palindrome mode can verify that a minimum length of 
-#adapter has been detected. If unspecified, this defaults to 8 bases, for historical reasons. 
-#However, since palindrome mode has a very low false positive rate, this can be safely reduced, even down to 1,
-# to allow shorter adapter fragments to be removed.
-#keepBothReads: After read-though has been detected by palindrome mode, and the adapter sequence removed, 
-#the reverse read contains the same sequence information as the forward read, albeit in reverse complement. 
-#For this reason, the default behaviour is to entirely drop the reverse read. By specifying „true‟ for this 
-#parameter, the reverse read will also be retained, which may be useful e.g. if the downstream tools cannot 
-#handle a combination of paired and unpaired reads.
+# Trimming command explanation for Trimmomatic (ILLUMINACLIP)
+# Format: ILLUMINACLIP:<adapter_file>:<seedMismatches>:<palindromeClipThreshold>:<simpleClipThreshold>:<minAdapterLength>:<keepBothReads>
 
-# leading: is going to remove bases at the beginning of the reads if it finds a quality base lower than the one I specify
-# trailing: is going to remove bases at the end if it finds a quality base lower than the one I specify. 
-#quality 10: 90% chances of being correct or 10% changes of being incorrect.
-#slidingwindow: 5:16 means go across the sequence. Scans the read with a 5 wide sliding window, cutting once
-# the average quality within the window falls below 16
-#why 16? if you have a 5 base window and one base have a quality of zero maybe because there is a bubble or 
-#something
-#but the other bases were good. the quality would be 4*20=80 and 80/5=16
-#you can modify these values as you wish.
-#minlen: is the minimum length we accept to have after cutting adapters and some part of the reads.
-#
+# seedMismatches: Maximum number of mismatches allowed in the seed (initial part of the adapter sequence).
+# palindromeClipThreshold: Stringency for detecting adapter dimers in paired-end reads via palindrome alignment.
+# simpleClipThreshold: Minimum alignment score needed for adapter clipping based on a simple alignment.
+# minAdapterLength: Minimum adapter length to be considered a valid match (default is 8; can be lowered to 1 for more aggressive trimming).
+# keepBothReads: If set to 'true', retains both reads after adapter clipping, even if they contain redundant sequence information.
+#                This may be necessary if downstream tools require strictly paired-end input.
+# LEADING:<quality> – Removes low-quality bases from the beginning of the read.
+#                     Bases are removed until a base with quality ≥ specified threshold is found.
+# TRAILING:<quality> – Removes low-quality bases from the end of the read.
+#                      Bases are trimmed from the 3' end until a base meets the quality threshold.
+# Quality score of 10 corresponds to 90% base call accuracy (10% chance of error).
+# SLIDINGWINDOW:<windowSize>:<requiredQuality> – Applies a sliding window approach.
+# Scans the read with a window of <windowSize> bases (e.g. 5), and cuts the read once the average quality in the window drops below <requiredQuality> (e.g. 16).
+# Example: For a 5-base window, if one base has a quality of 0 (e.g. due to a sequencing error) and the rest have quality 20,
+# the average is (4×20 + 0)/5 = 16. This explains the use of 16 as a threshold.
+# MINLEN:<length> – Discards reads that fall below the specified length after trimming.
+# Useful to ensure that only sufficiently long, high-quality reads are retained for downstream analysis.
+# Note: These thresholds can be adjusted based on your quality requirements and downstream tool compatibility.
+
+
 trimmer="ILLUMINACLIP:$adapter:2:14:7:2:true \
 LEADING:10 \
 TRAILING:10 \
