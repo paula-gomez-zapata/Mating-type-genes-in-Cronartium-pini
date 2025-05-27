@@ -1,0 +1,23 @@
+#This job will align the mating gene to the reference genome.
+#use samtools depth to extract coverage over the region where the gene was aligned.
+#compute average coverage
+
+#load modules
+module load minimap2
+module load samtools
+
+#define paths:
+directory=/xx/coverage_ref.genome
+ref_genome="/xx/assembly/pt_128_002_nuclear_20220614.fasta.gz"
+gene="/xx/gene_thirdMFA_refgenome.fasta"
+bam_file="/xx/coverage_ref.genome/pacbio_ref_mapped.bam"
+
+#minimap2 -x asm5 -c $ref_genome $gene > $directory/thirdMFA_alignment.sam
+#now go to this file and check the coordinates.
+
+#extract coverage over the region where the gene was aligned to the ref. genome.
+#uncomment this line and comment the above line to run this job again.
+samtools depth -r ptg000028l:407555-407776 $bam_file > $directory/thirdMFA_coverage.txt
+
+#compute average coverage
+awk '{sum += $3} END {print "Average coverage thirdMFA:", sum/NR}' $directory/thirdMFA_coverage.txt
